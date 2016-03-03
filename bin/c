@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker run --rm -it -v "$PWD:/src" -w /src -e PATH=/src/bin:/bin:/usr/bin --link mysql:db -u $UID minity/php54-console "$@"
