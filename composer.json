@@ -1,0 +1,23 @@
+{
+    "name": "infotech-ru/autocrm2-1c",
+    "license": "Proprietary",
+    "authors": [
+        {
+            "name": "Anton Tyutin",
+            "email": "anton@tyutin.ru"
+        }
+    ],
+    "require": {
+        "php": "~5.4",
+        "silex/silex": "~1.3",
+        "monolog/monolog": "~1.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.3.*"
+    },
+    "prefer-stable": true,
+    "config": {
+        "bin-dir": "bin",
+        "vendor-dir": "vendor"
+    }
+}

@@ -1,0 +1,8 @@
+app_dev:
+  image: minity/php54-webapp-dev
+  volumes:
+    - .:/src
+  external_links:
+    - mysql:db
+  environment:
+    - VIRTUAL_HOST=alt.autocrm2-1c.dev # см. https://hub.docker.com/r/jwilder/nginx-proxy/

@@ -1,0 +1,7 @@
+<?php
+/** @var \Silex\Application $app */
+
+$app['debug'] = true;
+$app['log.level'] = 'DEBUG';
+
+include __DIR__ . '/common.php';
