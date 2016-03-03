@@ -4,4 +4,9 @@
 $app['debug'] = true;
 $app['log.level'] = 'DEBUG';
 
+$app['db.host'] = 'db';
+$app['db.name'] = 'autocrm2_1c_integration';
+$app['db.user'] = 'root';
+$app['db.password'] = '';
+
 include __DIR__ . '/common.php';
