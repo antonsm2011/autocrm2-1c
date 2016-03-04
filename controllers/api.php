@@ -27,6 +27,18 @@ $api->post('/package/create', function (Request $request) use ($app) {
 
 // settings
 
+$app->finish(function () use ($app) {
+    $lockFile = sys_get_temp_dir() . '/autocrm2_1c_integration.processing.lock';
+    $app['logger']->info('Начало обработки отложенных записей');
+    if (file_exists($lockFile)) {
+        $app['logger']->info('Обработка уже запущена в другом процессе.');
+        return;
+    }
+    /** @var PDO $db */
+    $db = $app['db'];
+    $db->query('select client, data from packages where processed_at is null');
+});
+
 $api->before(function (Request $request) use ($app) {
     $key = $request->headers->get('X-API-Key');
 
