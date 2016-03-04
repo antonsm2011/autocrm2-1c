@@ -2,3 +2,4 @@
 /bin/
 /vendor/
 /config/config.php
+/config/clients.php

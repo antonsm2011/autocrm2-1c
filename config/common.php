@@ -22,6 +22,21 @@ $app['db'] = function ($app) {
     ]);
 };
 
+$app['clients'] = function () {
+    return require __DIR__ . '/../config/clients.php';
+};
+
+$app['clients_keys'] = function ($app) {
+    $map = [];
+    foreach ($app['clients'] as $client) {
+        foreach ($client['keys'] as $key) {
+            $map[$key] = &$client;
+        }
+    }
+
+    return $map;
+};
+
 $app->register(new MonologServiceProvider(), [
     "monolog.logfile" => __DIR__ . "/../logs/" . date("Y-m-d") . ".log",
     "monolog.level" => isset($app["log.level"]) ? $app["log.level"] : 'WARNING',
