@@ -5,4 +5,4 @@ app_dev:
   external_links:
     - mysql:db
   environment:
-    - VIRTUAL_HOST=alt.autocrm2-1c.dev # см. https://hub.docker.com/r/jwilder/nginx-proxy/
+    - VIRTUAL_HOST=autocrm2-1c.dev # см. https://hub.docker.com/r/jwilder/nginx-proxy/

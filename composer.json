@@ -1,6 +1,7 @@
 {
     "name": "infotech-ru/autocrm2-1c",
     "license": "Proprietary",
+    "version": "0.1.0",
     "authors": [
         {
             "name": "Anton Tyutin",
@@ -20,5 +21,13 @@
     "config": {
         "bin-dir": "bin",
         "vendor-dir": "vendor"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "bin/phinx migrate"
+        ],
+        "post-create-project-cmd": [
+            "php -r \"foreach (glob('config/*.dist') as $file) copy($file, substr($file, 0, -5));\""
+        ]
     }
 }
