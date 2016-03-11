@@ -12,6 +12,6 @@ $app['db'] = $app->share(function ($app) {
     $password = isset($app['db.password']) ? $app['db.password'] : '';
 
     return new PDO($dsn, $user, $password, [
-        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET time_zone = "' . date('P') . '"'
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8; SET time_zone = "' . date('P') . '"'
     ]);
 });
