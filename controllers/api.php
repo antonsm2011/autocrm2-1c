@@ -28,15 +28,44 @@ $api->post('/package/create', function (Request $request) use ($app) {
 // settings
 
 $app->finish(function () use ($app) {
-    $lockFile = sys_get_temp_dir() . '/autocrm2_1c_integration.processing.lock';
-    $app['logger']->info('Начало обработки отложенных записей');
-    if (file_exists($lockFile)) {
-        $app['logger']->info('Обработка уже запущена в другом процессе.');
-        return;
-    }
+    $retryMargin = date_create()->modify('-5 minutes');
+
+    /** @var \Monolog\Logger $logger */
+    $logger = $app['logger']->withName('v2_interaction');
+    $logger->info('Начало обработки отложенных записей не обрабатывавшихся с ' . $retryMargin->format('d.m.Y H:i:s'));
+
     /** @var PDO $db */
     $db = $app['db'];
-    $db->query('select client, data from packages where processed_at is null');
+    $recordsCount = $db->exec(
+        'update packages set locked_by = ' . $db->quote($app['process_id'])
+            . ' where locked_by is null and finished_at is null and ifnull(processed_at, "0000-00-00 00:00:00") < '
+            . $db->quote($retryMargin->format('Y-m-d H:i:s'))
+    );
+
+    if (!$recordsCount) {
+        $logger->info('Очередь обработки пуста');
+
+        return;
+    }
+
+    $logger->info('Количество записей, ожидающих обработки: ' . $recordsCount);
+
+    $res = $db->query('select id, created_by, data from packages where locked_by = ' . $db->quote($app['process_id']));
+
+    while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
+        if (null === $data = json_decode($row['data'], true)) {
+            $logger->error('Ошибка декодирования данных отложенной записи', ['row' => $row]);
+        }
+
+        // todo: дописать обработку данных
+    }
+});
+
+$app->finish(function () use ($app) {
+    /** @var PDO $db */
+    $db = $app['db'];
+
+    $db->exec('update packages set locked_by = NULL where locked_by = ' . $db->quote($app['process_id']));
 });
 
 $api->before(function (Request $request) use ($app) {

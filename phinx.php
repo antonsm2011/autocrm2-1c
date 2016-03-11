@@ -16,7 +16,7 @@ return [
         'default_database' => 'main',
         'main' => [
             'adapter' => 'mysql',
-            'name' => 'devdb',
+            'name' => $app['db.name'],
             'connection' => $app['db']
         ]
     ]
