@@ -5,11 +5,17 @@ use Symfony\Component\Debug\ErrorHandler;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-ErrorHandler::register();
+$errorHandler = ErrorHandler::register();
 
 $app = new Silex\Application();
 
 require __DIR__ . '/../config/config.php';
+
+$app->extend('logger', function ($logger) use ($errorHandler) {
+    $errorHandler->setDefaultLogger($logger);
+
+    return $logger;
+});
 
 foreach (scandir(CONTROLLERS_DIR) as $file) {
     if (is_file(CONTROLLERS_DIR . '/'. $file) && substr($file, -4) === '.php') {
