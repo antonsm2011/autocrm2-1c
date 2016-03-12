@@ -11,7 +11,8 @@
         "php": "~5.4",
         "silex/silex": "~1.3",
         "monolog/monolog": "~1.6",
-        "robmorgan/phinx": "^0.5.2"
+        "robmorgan/phinx": "^0.5.2",
+        "guzzlehttp/guzzle": "^6.1"
     },
     "require-dev": {
         "phpunit/phpunit": "4.3.*"

@@ -57,8 +57,17 @@ $app->finish(function () use ($app) {
             $logger->error('Ошибка декодирования данных отложенной записи', ['row' => $row]);
         }
 
-        // todo: дописать обработку данных
+        if ($app['v2']['service_case']($data, $row['created_by'])) {
+            $db->exec(
+                'update packages set finished_at = ' . $db->quote(date('Y-m-d H:i:s')) . ', locked_by = NULL'
+                    . ' where id = ' . $db->quote($row['id'], PDO::PARAM_INT)
+            );
+        } else {
+            $logger->error('Ошибка при сохранении в v2 отложенной записи', ['row' => $row]);
+        }
     }
+
+    $logger->info('Обработка отложенных записей завершена');
 });
 
 $app->finish(function () use ($app) {
