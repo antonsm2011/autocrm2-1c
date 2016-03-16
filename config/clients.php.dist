@@ -3,6 +3,10 @@
 return [
     [
         'id' => 'super-client',
-        'keys' => ['super-client-key1']
+        'keys' => ['super-client-key1'],
+        'v2' => [
+            'base_url' => 'http://v2.dealer.autocrm.ru',
+            'auth_key' => '', // http://v2.dealer.autocrm.ru/authToken/create
+        ],
     ],
 ];
