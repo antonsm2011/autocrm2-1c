@@ -56,11 +56,14 @@ $app->finish(function () use ($app) {
         if (null === $data = json_decode($row['data'], true)) {
             $logger->error('Ошибка декодирования данных отложенной записи', ['row' => $row]);
         }
+        $idSql = $db->quote($row['id'], PDO::PARAM_INT);
+
+        $db->exec('update packages set processed_at = ' . $db->quote(date('Y-m-d H:i:s')) . ' where id = ' . $idSql);
 
         if ($app['v2']['service_case']($data, $row['created_by'])) {
             $db->exec(
                 'update packages set finished_at = ' . $db->quote(date('Y-m-d H:i:s')) . ', locked_by = NULL'
-                    . ' where id = ' . $db->quote($row['id'], PDO::PARAM_INT)
+                    . ' where id = ' . $idSql
             );
         } else {
             $logger->error('Ошибка при сохранении в v2 отложенной записи', ['row' => $row]);
