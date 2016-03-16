@@ -4,5 +4,6 @@ app_dev:
     - .:/src
   external_links:
     - mysql:db
+    - $V2_APP_CONTAINER:v2.dealer.autocrm.dev
   environment:
     - VIRTUAL_HOST=autocrm2-1c.dev # см. https://hub.docker.com/r/jwilder/nginx-proxy/

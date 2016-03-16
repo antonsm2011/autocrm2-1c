@@ -1,51 +1,17 @@
 <?php
 /** @var \Silex\Application $app */
 
-use Silex\Provider\MonologServiceProvider;
-
 define('CONTROLLERS_DIR', __DIR__ . '/../controllers');
+define('SERVICES_DIR', __DIR__ . '/../services');
 
 date_default_timezone_set('Europe/Moscow');
 
-$app['db'] = function ($app) {
-    $dsn = sprintf(
-        'mysql:host=%s;port=%s;dbname=%s',
-        isset($app['db.host']) ? $app['db.host'] : 'localhost',
-        isset($app['db.port']) ? $app['db.port'] : '3306',
-        $app['db.name']
-    );
-    $user = isset($app['db.user']) ? $app['db.user'] : 'root';
-    $password = isset($app['db.password']) ? $app['db.password'] : '';
-
-    return new PDO($dsn, $user, $password, [
-        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET time_zone = "' . date('P') . '"'
-    ]);
-};
-
-$app['clients'] = function () {
-    return require __DIR__ . '/../config/clients.php';
-};
-
-$app['clients_keys'] = function ($app) {
-    $map = [];
-    foreach ($app['clients'] as $client) {
-        foreach ($client['keys'] as $key) {
-            $map[$key] = &$client;
-        }
-    }
-
-    return $map;
-};
-
-$app->register(new MonologServiceProvider(), [
-    "monolog.logfile" => __DIR__ . "/../logs/" . date("Y-m-d") . ".log",
-    "monolog.level" => isset($app["log.level"]) ? $app["log.level"] : 'WARNING',
-    "monolog.name" => "application"
-]);
-
-$app->error(function (\Exception $e, $code) use ($app) {
-    $app['monolog']->addError($e->getMessage());
-    $app['monolog']->addError($e->getTraceAsString());
-
-    return ['error_code' => $code, 'error_message' => $e->getMessage()];
+$app['process_id'] = $app->share(function () {
+    return md5(getmypid() . microtime());
 });
+
+foreach (scandir(SERVICES_DIR) as $file) {
+    if (is_file(SERVICES_DIR . '/' . $file) && substr($file, -4) === '.php') {
+        include SERVICES_DIR . '/' . $file;
+    }
+}
