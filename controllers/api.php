@@ -19,9 +19,17 @@ $api->post('/package/create', function (Request $request) use ($app) {
 
     $sql = 'insert into packages (created_by, created_at, data) values (:client, now(), :data)';
 
-    return $db->prepare($sql)->execute($dbData)
-        ? new Response($request->getContent(), 201, ['Content-Type' => $request->headers->get('Content-Type')])
-        : new Response('Ошибка обработки данных', 500);
+    if ($db->prepare($sql)->execute($dbData)) {
+        return new Response($request->getContent(), 201, ['Content-Type' => $request->headers->get('Content-Type')]);
+    } else {
+        $app['logger']->error('Ошибка при сохранении данных', [
+            'sql' => $sql,
+            'params' => $dbData,
+            'error' => $db->errorInfo()
+        ]);
+
+        return new Response('Ошибка при сохранении данных', 500);
+    }
 });
 
 
