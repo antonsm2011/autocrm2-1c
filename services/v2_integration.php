@@ -446,7 +446,7 @@ $departmentSaver = function (array $data, $forClient) use ($app) {
 $vehicleModelGetter = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
-    if (null !== $modelId = $app['association_fetcher']($forClient, 'models', $data->string('Id'))) {
+    if (null === $modelId = $app['association_fetcher']($forClient, 'models', $data->string('Id'))) {
         $result = $app['v2_send']($forClient, 'get', '/models', ['query' => ['fullName' => $data->string("Name")]]);
         if ($result /* not null and not empty array */) {
             $modelId = $result[0]['id'];
@@ -458,15 +458,15 @@ $vehicleModelGetter = function (array $data, $forClient) use ($app) {
 };
 
 $autosalonGetter = function (array $data, $forClient) use ($app) {
-    if (null !== $modelId = $app['association_fetcher']($forClient, 'models', 'default')) {
+    if (null === $autosalonId = $app['association_fetcher']($forClient, 'autosalons', 'default')) {
         $result = $app['v2_send']($forClient, 'get', '/autosalons');
         if ($result /* not null and not empty array */) {
-            $modelId = $result[0]['id'];
-            $app['association_saver']($forClient, 'autosalons', 'default', $modelId);
+            $autosalonId = $result[0]['id'];
+            $app['association_saver']($forClient, 'autosalons', 'default', $autosalonId);
         }
     }
 
-    return $modelId;
+    return $autosalonId;
 };
 
 // ------------------------------------------------------------
@@ -515,7 +515,9 @@ $app['v2_send'] = $app->protect(
             ],
         ]);
 
+        $logger->debug('Начало отправки данных ' . strtoupper($method) . ' ' . $url);
         $response = $http->send($http->createRequest($method, $url, $options));
+        $logger->debug('Получен ответ ' . strtoupper($method) . ' ' . $url, ['response' => $response]);
 
         if (substr($response->getStatusCode(), 0, 1) !== '2') {
             $result = null;
