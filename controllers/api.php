@@ -65,6 +65,8 @@ $app->finish(function () use ($app) {
 
     $res = $db->query('select id, created_by, data from packages where locked_by = ' . $db->quote($app['process_id']));
 
+    $errorsCount = 0;
+
     while ($row = $res->fetch(PDO::FETCH_ASSOC)) {
         if (null === $data = json_decode($row['data'], true)) {
             $logger->error('Ошибка декодирования данных отложенной записи', ['row' => $row]);
@@ -78,12 +80,17 @@ $app->finish(function () use ($app) {
                 'update packages set finished_at = ' . $db->quote(date('Y-m-d H:i:s')) . ', locked_by = NULL'
                     . ' where id = ' . $idSql
             );
+            $logger->info('Запись ' . $row['id'] . ' успешно обработана');
         } else {
             $logger->error('Ошибка при сохранении в v2 отложенной записи', ['row' => $row]);
+            $errorsCount++;
         }
     }
 
-    $logger->info('Обработка отложенных записей завершена');
+    $logger->info(
+        'Обработка отложенных записей завершена. Успешно обработано - ' . ($recordsCount - $errorsCount)
+            . ', ошибок - ' . ($errorsCount)
+    );
 });
 
 $app->finish(function () use ($app) {
