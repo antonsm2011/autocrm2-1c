@@ -271,7 +271,8 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
         "Закрыт" => 'completed',
     ];
 
-    $contact = $data->data('Client')->collection('Contacts', 'filled', ['Type', 'Id', 'Phones'])[0];
+    $contacts = $data->data('Client')->collection('Contacts', 'filled', ['Type', 'Id', 'Phones']);
+    $contactId = $contacts ? $contacts[0]['Id'] : $data->data('Client')->string('Id') . ':self';
 
     $caseData = [
         'no' => $data->string('Id'),
@@ -285,7 +286,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
         'repairType' => $repairTypeId,
         'status' => $data->data('Stage')->enum('Name', $statusMap) ?: 'service.reminder',
         'client' => ['id' => $app['association_fetcher']($forClient, 'clients', $data->data('Client')->string('Id'))],
-        'contact' => ['id' => $app['association_fetcher']($forClient, 'persons', $contact['Id'])],
+        'contact' => ['id' => $app['association_fetcher']($forClient, 'persons', $contactId)],
         'vehicle' => ['id' => $app['association_fetcher']($forClient, 'vehicles', $data->data('Car')->string('Id'))],
     ];
 
@@ -361,13 +362,24 @@ $clientSaver = function (array $data, $forClient) use ($app) {
     }
 
 
-    if ($v2client = $app['v2_save']($forClient, 'clients', $data->string('Id'), $clientData, ['type' => $type])) {
+    $v2Client = null;
+
+    if ($app['v2_save']($forClient, 'clients', $data->string('Id'), $clientData, ['type' => $type], 'id', $v2Client)) {
+        if ($type == 'individual') {
+            $app['association_saver'](
+                $forClient,
+                'persons',
+                $data->string('Id') . ':self',
+                $v2Client['selfContact']['id']
+            );
+        }
+
         foreach ($data->collection('Contacts', 'filled', ['Phones']) as $personData) {
             $app['v2']['person'](array_merge($personData, ['Client' => $data->string('Id')]), $forClient);
         }
     }
 
-    return $v2client;
+    return $v2Client['id'];
 };
 
 $personSaver = function (array $data, $forClient) use ($app) {
@@ -605,10 +617,11 @@ $app['v2_save'] = $app->protect(
      * @param array  $data
      * @param array  $query
      * @param string $idField
+     * @param array|null $crmData
      *
      * @return null|integer
      */
-    function ($clientId, $type, $id, $data, $query = [], $idField = 'id') use ($app) {
+    function ($clientId, $type, $id, $data, $query = [], $idField = 'id', &$crmData = null) use ($app) {
         /** @var \Monolog\Logger $logger */
         $logger = $app['logger']->withName('v2_saver');
 
@@ -623,20 +636,20 @@ $app['v2_save'] = $app->protect(
         $url = implode('/', ['', $type, ($crmId ? 'save/' . $crmId : 'create')]);
         $logger->debug('Отправка запроса "' . $url . '"', ['query' => $query, 'json' => $data]);
 
-        $result = $app['v2_send']($clientId, 'post', $url, $data, $query);
+        $crmData = $app['v2_send']($clientId, 'post', $url, $data, $query);
 
-        if ($result === null) {
+        if ($crmData === null) {
             return null;
         }
-        if (empty($result[$idField])) {
-            $logger->error('Не обнаружен идентификатор сохраненных данных в поле "' . $idField . '"', $result);
+        if (empty($crmData[$idField])) {
+            $logger->error('Не обнаружен идентификатор сохраненных данных в поле "' . $idField . '"', $crmData);
 
             return null;
         }
 
-        $app['association_saver']($clientId, $type, $id, $result[$idField]);
+        $app['association_saver']($clientId, $type, $id, $crmData[$idField]);
 
-        return $result[$idField];
+        return $crmData[$idField];
     }
 );
 
