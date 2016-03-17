@@ -330,9 +330,10 @@ $clientSaver = function (array $data, $forClient) use ($app) {
     }
 
     if ($type == 'individual') {
-        $nameParts = [$data->string('LastName'), $data->string('Name'), $data->string('MiddleName')];
         $clientData = array_merge($clientData, [
-            'name' => implode(' ', array_filter($nameParts)),
+            'lastName' => $data->string('LastName'),
+            'firstName' => $data->string('Name'),
+            'middleName' => $data->string('MiddleName'),
             'gender' => $data->string("Gender"),
         ]);
     } else {
