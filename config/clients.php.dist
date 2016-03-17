@@ -2,11 +2,13 @@
 
 return [
     [
-        'id' => 'super-client',
-        'keys' => ['super-client-key1'],
-        'v2' => [
-            'base_url' => 'http://v2.dealer.autocrm.ru',
-            'auth_key' => '', // http://v2.dealer.autocrm.ru/authToken/create
+        'id' => 'super-client', // строка-идентификатор клиента
+        'keys' => ['super-client-key1'], // список ключей, которые клиент передает в заголовке запроса `X-API-Key`
+        'v2' => [ // настройки соединения с CRM v2
+            'base_url' => 'http://v2.dealer.autocrm.ru', // базовая часть URL, от которой строятся запросы API
+            'auth_key' => '', // Ключ доступа к API CRM v2, который можно сгенерировать, залогинившись
+                              // под пользователем с правами администратора и запросив в браузере
+                              // http://v2.dealer.autocrm.ru/authToken/create
         ],
     ],
 ];
