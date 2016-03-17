@@ -344,12 +344,13 @@ $clientSaver = function (array $data, $forClient) use ($app) {
     }
 
     foreach ($data->collection('Documents', 'filled', ["Type", "Serie", "Number"]) as $documentData) {
-        if ('individual' == $type && $documentData['Type'] == 'Паспорт гражданина РФ') {
+        $documentData = DataArray::create($documentData);
+        if ('individual' == $type && $documentData->string('Type') == 'Паспорт гражданина РФ') {
             $clientData = array_merge($clientData, [
-                'passportSerie' => $data->string("Serie"),
-                'passportNumber' => $data->string("Number"),
-                'passportIssuedAt' => $data->string("IssuedAt"),
-                'passportIssuedBy' => $data->string("IssuedBy"),
+                'passportSerie' => $documentData->string("Serie"),
+                'passportNumber' => $documentData->string("Number"),
+                'passportIssuedAt' => $documentData->string("IssuedAt"),
+                'passportIssuedBy' => $documentData->string("IssuedBy"),
             ]);
         }
     }
