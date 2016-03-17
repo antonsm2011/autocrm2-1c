@@ -240,7 +240,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
     $success = null !== ($departmentId = $app['v2']['department']($data->hash('Department'), $forClient)) && $success;
 
     $assigneeId = null;
-    foreach ($data->collection('Employees') as $employeeData) {
+    foreach ($data->collection('Employees', 'filled', ['Type', 'Id', 'Name']) as $employeeData) {
         $employeeData['Department'] = $data->data('Department')->string('Id');
         $success = null !== ($userId = $app['v2']['user']($employeeData, $forClient)) && $success;
 
