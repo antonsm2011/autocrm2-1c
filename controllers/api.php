@@ -50,7 +50,12 @@ $app->finish(function () use ($app) {
             . $db->quote($retryMargin->format('Y-m-d H:i:s'))
     );
 
-    if (!$recordsCount) {
+    if (false === $recordsCount) {
+        $logger->error('Ошибка получения количества записей в очереди обработки', $db->errorInfo());
+
+        return;
+    }
+    if (0 === $recordsCount) {
         $logger->info('Очередь обработки пуста');
 
         return;
