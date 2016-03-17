@@ -701,7 +701,7 @@ class DataArray {
     public function filled($field, $requiredFields)
     {
         if ($structData = $this->hash($field)) {
-            if (!array_diff_key($structData, array_reverse($requiredFields))) {
+            if (array_intersect(array_keys($structData), $requiredFields) != $requiredFields) {
                 $structData = null;
             }
         }
