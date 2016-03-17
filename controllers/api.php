@@ -82,7 +82,7 @@ $app->finish(function () use ($app) {
             );
             $logger->info('Запись ' . $row['id'] . ' успешно обработана');
         } else {
-            $logger->error('Ошибка при сохранении в v2 отложенной записи', ['row' => $row]);
+            $logger->error('Ошибка при сохранении в v2 отложенной записи ' .  $row['id']);
             $errorsCount++;
         }
     }

@@ -546,6 +546,10 @@ $app['v2_send'] = $app->protect(
             $logger->error(
                 'Ошибка API запроса к v2. Получен ошибочный код ответа',
                 [
+                    'request' => [
+                        'url' => $url,
+                        'data' => $data,
+                    ],
                     'response' => [
                         'status' => $response->code,
                         'body' => $response->raw_body,
@@ -559,6 +563,10 @@ $app['v2_send'] = $app->protect(
                 $logger->error(
                     'Ошибка API запроса к v2. Полученный ответ не является валидным json-ом',
                     [
+                        'request' => [
+                            'url' => $url,
+                            'data' => $data,
+                        ],
                         'response' => [
                             'status' => $response->code,
                             'body' => $response->raw_body,
@@ -570,9 +578,13 @@ $app['v2_send'] = $app->protect(
                 $logger->error(
                     'Ошибка API запроса к v2. API v2 вернул ошибку',
                     [
+                        'request' => [
+                            'url' => $url,
+                            'data' => $data,
+                        ],
                         'response' => [
                             'status' => $response->code,
-                            'body' => $savedData,
+                            'data' => $savedData,
                         ],
                     ]
                 );
