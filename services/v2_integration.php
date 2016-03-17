@@ -1,9 +1,13 @@
 <?php
 /** @var \Silex\Application $app */
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ParseException;
-use GuzzleHttp\Ring\Client\StreamHandler;
+
+use Httpful\Handlers\JsonHandler;
+use Httpful\Httpful;
+use Httpful\Mime;
+use Httpful\Request;
+
+Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
 
 /*
  * Сохранение рабочего листа и заказ-наряда
@@ -447,7 +451,7 @@ $vehicleModelGetter = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
     if (null === $modelId = $app['association_fetcher']($forClient, 'models', $data->string('Id'))) {
-        $result = $app['v2_send']($forClient, 'get', '/models', ['query' => ['fullName' => $data->string("Name")]]);
+        $result = $app['v2_send']($forClient, 'get', '/models', null, ['fullName' => $data->string("Name")]);
         if ($result /* not null and not empty array */) {
             $modelId = $result[0]['id'];
             $app['association_saver']($forClient, 'models', $data->string('Id'), $modelId);
@@ -495,69 +499,85 @@ $app['v2_send'] = $app->protect(
      *
      * @return array|null
      */
-    function ($clientId, $method, $url, $options = []) use ($app) {
+    function ($clientId, $method, $url, array $data = null, array $query = null) use ($app) {
         /** @var \Monolog\Logger $logger */
         $logger = $app['logger']->withName('v2_send');
 
         $clientConfig = $app['client_fetcher']($clientId);
 
-        $http = new Client([
-            'handler' => new StreamHandler(),
-            'base_url' => $clientConfig['v2']['base_url'],
-            'defaults' => [
-                'debug' => $app['debug'],
-                'exceptions' => false,
-                'timeout' => 5, // sec
-                'headers' => [
-                    'X-AutoCRM-API' => '1',
-                    'X-AutoCRM-Access-Token' => $clientConfig['v2']['auth_key']
-                ],
-            ],
-        ]);
+        $url = $clientConfig['v2']['base_url'] . '/' . ltrim($url, '/');
+        if ($query) {
+            $urlStructure = parse_url($url);
+            $queryString = isset($urlStructure['query']) ? $urlStructure['query'] : null;
+            $urlStructure['query'] = implode('&', array_filter([$queryString, http_build_query($query)]));
+            $url = $urlStructure['scheme'] . '://'
+                . (isset($urlStructure['user'])
+                    ? $urlStructure['user'] . (isset($urlStructure['pass']) ? ':' . $urlStructure['pass'] : '') . '@'
+                    : '')
+                . (isset($urlStructure['host']) ? $urlStructure['host'] : '')
+                . (isset($urlStructure['port']) ? ':' . $urlStructure['port'] : '')
+                . (isset($urlStructure['path']) ? $urlStructure['path'] : '')
+                . (isset($urlStructure['query']) ? '?' . $urlStructure['query'] : '')
+                . (isset($urlStructure['fragment']) ? '#' . $urlStructure['fragment'] : '')
+            ;
+        }
 
-        $logger->debug('Начало отправки данных ' . strtoupper($method) . ' ' . $url);
-        $response = $http->send($http->createRequest($method, $url, $options));
-        $logger->debug('Получен ответ ' . strtoupper($method) . ' ' . $url, ['response' => $response]);
+        if ($data === null) {
+            $requestBody = null;
+        } elseif (!$requestBody = json_encode($data, JSON_UNESCAPED_UNICODE)) {
+            $logger->error('Ошибка сериализации данных для передачи в v2.', [
+                'data' => $data,
+            ]);
+        }
 
-        if (substr($response->getStatusCode(), 0, 1) !== '2') {
+        $method = strtoupper($method);
+
+        $request = Request::init($method)->uri($url)->sends(Mime::JSON)
+            ->addHeader('X-AutoCRM-API', '1')
+            ->addHeader('X-AutoCRM-Access-Token', $clientConfig['v2']['auth_key'])
+            ->body($requestBody);
+
+        $logger->debug('Начало отправки данных ' . $method . ' ' . $url);
+        $response = $request->send();
+        $logger->debug('Получен ответ ' . $method . ' ' . $url, ['response' => $response]);
+
+        if (substr($response->code, 0, 1) !== '2') {
             $result = null;
             $logger->error(
                 'Ошибка API запроса к v2. Получен ошибочный код ответа',
                 [
                     'response' => [
-                        'status' => $response->getStatusCode(),
-                        'body' => $response->getBody()->getContents(),
+                        'status' => $response->code,
+                        'body' => $response->raw_body,
                     ],
                 ]
             );
         } else {
-            try {
-                $savedData = $response->json();
-                if (!$savedData['success']) {
-                    $result = null;
-                    $logger->error(
-                        'Ошибка API запроса к v2. API v2 вернул ошибку',
-                        [
-                            'response' => [
-                                'status' => $response->getStatusCode(),
-                                'body' => $response->json(),
-                            ],
-                        ]
-                    );
-                } else {
-                    $result = $savedData['result'];
-                }
-            } catch (ParseException $e) {
+            $savedData = $response->body;
+            if (!$savedData) {
                 $result = null;
                 $logger->error(
                     'Ошибка API запроса к v2. Полученный ответ не является валидным json-ом',
                     [
                         'response' => [
-                            'status' => $response->getStatusCode(),
-                            'body' => $response->getBody()->getContents(),
+                            'status' => $response->code,
+                            'body' => $response->raw_body,
                         ],
                     ]
                 );
+            } elseif (!$savedData['success']) {
+                $result = null;
+                $logger->error(
+                    'Ошибка API запроса к v2. API v2 вернул ошибку',
+                    [
+                        'response' => [
+                            'status' => $response->code,
+                            'body' => $savedData,
+                        ],
+                    ]
+                );
+            } else {
+                $result = $savedData['result'];
             }
         }
 
@@ -589,10 +609,9 @@ $app['v2_save'] = $app->protect(
         $crmId = $app['association_fetcher']($clientId, $type, $id);
 
         $url = implode('/', ['', $type, ($crmId ? 'save/' . $crmId : 'create')]);
-        $options = ['query' => $query, 'json' => $data];
-        $logger->debug('Отправка запроса "' . $url . '"', $options);
+        $logger->debug('Отправка запроса "' . $url . '"', ['query' => $query, 'json' => $data]);
 
-        $result = $app['v2_send']($clientId, 'post', $url, $options);
+        $result = $app['v2_send']($clientId, 'post', $url, $data, $query);
 
         if ($result === null) {
             return null;
