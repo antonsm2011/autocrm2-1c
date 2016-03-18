@@ -276,6 +276,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
     $contactId = $contacts ? $contacts[0]['Id'] : $data->data('Client')->string('Id') . ':self';
 
     $caseData = [
+        'createdAt' => $data->string('Date'),
         'no' => $data->string('Id'),
         'works' => $works,
         'assignee' => $assigneeId,
