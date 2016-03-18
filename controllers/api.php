@@ -75,7 +75,10 @@ $app->finish(function () use ($app) {
 
         $db->exec('update packages set processed_at = ' . $db->quote(date('Y-m-d H:i:s')) . ' where id = ' . $idSql);
 
-        if ($app['v2']['service_case']($data, $row['created_by'])) {
+        if (empty($data['DataType']) || $data['DataType'] !== 'Заказ-наряд') {
+            $logger->error('Данные записи ' .  $row['id'] . ' не являются заказ-нарядом');
+            $errorsCount++;
+        } elseif ($app['v2']['service_case']($data, $row['created_by'])) {
             $db->exec(
                 'update packages set finished_at = ' . $db->quote(date('Y-m-d H:i:s')) . ', locked_by = NULL'
                     . ' where id = ' . $idSql
