@@ -361,6 +361,7 @@ $clientSaver = function (array $data, $forClient) use ($app) {
         }
     }
 
+    $clientData['autosalons'] = [$app['v2']['autosalon']([], $forClient)];
 
     $v2Client = null;
 
@@ -726,7 +727,7 @@ class DataArray {
     public function filled($field, $requiredFields)
     {
         if ($structData = $this->hash($field)) {
-            if (array_intersect(array_keys($structData), $requiredFields) != $requiredFields) {
+            if (array_intersect($requiredFields, array_keys($structData)) != $requiredFields) {
                 $structData = null;
             }
         }
