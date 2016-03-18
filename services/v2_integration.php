@@ -209,12 +209,17 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
         "Client" => $data->hash('Client')
     ]);
 
-    $success = null !== $app['v2']['client_vehicle']($vehicleData, $forClient);
+    $success = true;
 
-    $works = array_map(function ($srcData) use (&$success, $app, $forClient) {
+    $success = null !== ($departmentId = $app['v2']['department']($data->hash('Department'), $forClient)) && $success;
+    $success = null !== ($repairTypeId = $app['v2']['service_repair_type']($data->hash('RepairType'), $forClient)) && $success;
+    $success = null !== $app['v2']['client_vehicle']($vehicleData, $forClient) && $success;
+
+    $works = array_map(function ($srcData) use (&$success, $data, $app, $forClient) {
         $srcData = DataArray::create($srcData);
 
         $typeData = $srcData->hash('Type');
+        $typeData['Department'] = $data->data('Department')->string('Id');
         if (!isset($typeData["StandardTime"])) {
             $typeData["StandardTime"] = $srcData->number("StandardTime");
         }
@@ -238,10 +243,6 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
             "totalPrice" => $srcData->number('Sum'),
         ];
     }, $data->collection('Materials'));
-
-    $success = null !== ($repairTypeId = $app['v2']['service_repair_type']($data->hash('RepairType'), $forClient)) && $success;
-
-    $success = null !== ($departmentId = $app['v2']['department']($data->hash('Department'), $forClient)) && $success;
 
     $assigneeId = null;
     foreach ($data->collection('Employees', 'filled', ['Id', 'Name', 'Role']) as $employeeData) {
@@ -425,6 +426,7 @@ $serviceWorkTypeSaver = function (array $data, $forClient) use ($app) {
         'code' => $data->string('Code'),
         'name' => $data->string('Name'),
         "standardTime" => $data->number('StandardTime'),
+        'department' => $app['association_fetcher']($forClient, 'departments', $data->string('Department')),
     ]);
 };
 
