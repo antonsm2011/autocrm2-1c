@@ -15,9 +15,10 @@ $app['association_fetcher'] = $app->protect(function ($clientId, $type, $sourceI
         ':sourceId' => $sourceId,
     ]);
 
-    if ($crmId = $stmt->fetchColumn()) {
+    if (false !== $crmId = $stmt->fetchColumn()) {
         $logger->debug(sprintf('Найдена ассоциация типа "%s": "%s" => "%s"', $type, $sourceId, $crmId));
     } else {
+        $crmId = null;
         $logger->debug(sprintf('Не найдена ассоциация типа "%s" для ID = "%s"', $type, $sourceId));
     }
     
