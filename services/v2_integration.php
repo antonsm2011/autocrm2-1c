@@ -467,7 +467,7 @@ $vehicleModelGetter = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
     if (null === $modelId = $app['association_fetcher']($forClient, 'models', $data->string('Id'))) {
-        $result = $app['v2_send']($forClient, 'get', '/models', null, ['fullName' => $data->string("Name")]);
+        $result = $app['v2_send']($forClient, 'get', '/models', null, ['q' => $data->string("Name")]);
         if ($result /* not null and not empty array */) {
             $modelId = $result[0]['id'];
             $app['association_saver']($forClient, 'models', $data->string('Id'), $modelId);
