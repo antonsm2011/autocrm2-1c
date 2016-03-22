@@ -560,7 +560,7 @@ $app['v2_send'] = $app->protect(
         if (substr($response->code, 0, 1) !== '2') {
             $result = null;
             $logger->error(
-                'Ошибка API запроса к v2. Получен ошибочный код ответа',
+                'Ошибка API запроса к v2. Получен ошибочный код ответа ' . $response->code,
                 [
                     'request' => [
                         'url' => $url,
