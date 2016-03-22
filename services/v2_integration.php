@@ -442,7 +442,7 @@ $userSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
     return $app['v2_save']($forClient, 'users', $data->string("Id"), [
-        'username' => $data->string("Name"),
+        'username' => $data->string("Id"),
         'password' => uniqid(),
         'role' => 'admin',
         'fullname' => $data->string("Name"),
