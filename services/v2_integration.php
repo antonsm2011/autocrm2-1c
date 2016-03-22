@@ -635,23 +635,39 @@ $app['v2_save'] = $app->protect(
             return null;
         }
 
-        $crmId = $app['association_fetcher']($clientId, $type, $id);
+        static $changes = [];
+        $changeDetectionKey = $type . ':' . $id;
+        $changeDetectionHash = md5(serialize([$id, $data]));
+        if (!isset($changes[$changeDetectionKey]) || $changes[$changeDetectionKey]['hash'] != $changeDetectionHash) {
+            $crmId = $app['association_fetcher']($clientId, $type, $id);
 
-        $url = implode('/', ['', $type, ($crmId ? 'save/' . $crmId : 'create')]);
-        $logger->debug('Отправка запроса "' . $url . '"', ['query' => $query, 'json' => $data]);
+            $url = implode('/', ['', $type, ($crmId ? 'save/' . $crmId : 'create')]);
+            $logger->debug('Отправка запроса "' . $url . '"', ['query' => $query, 'json' => $data]);
 
-        $crmData = $app['v2_send']($clientId, 'post', $url, $data, $query);
+            $crmData = $app['v2_send']($clientId, 'post', $url, $data, $query);
 
-        if ($crmData === null) {
-            return null;
+            if ($crmData === null) {
+                return null;
+            }
+            if (empty($crmData[$idField])) {
+                $logger->error('Не обнаружен идентификатор сохраненных данных в поле "' . $idField . '"', $crmData);
+
+                return null;
+            }
+
+            $app['association_saver']($clientId, $type, $id, $crmData[$idField]);
+            $changes[$changeDetectionKey] = [
+                'hash' => $changeDetectionHash,
+                'crmData' => $crmData,
+            ];
+        } else {
+            $logger->info('Данные взяты из локального кэша, т.к. ранее уже были сохранены.', [
+                'type' => $type,
+                'id' => $id,
+                'data' => $data,
+            ]);
+            $crmData = $changes[$changeDetectionKey]['crmData'];
         }
-        if (empty($crmData[$idField])) {
-            $logger->error('Не обнаружен идентификатор сохраненных данных в поле "' . $idField . '"', $crmData);
-
-            return null;
-        }
-
-        $app['association_saver']($clientId, $type, $id, $crmData[$idField]);
 
         return $crmData[$idField];
     }
