@@ -1,6 +1,7 @@
 <?php
 /** @var \Silex\Application $app */
 
+use Monolog\Formatter\NormalizerFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
 use Silex\Provider\MonologServiceProvider;
@@ -51,8 +52,8 @@ class PDOHandler extends AbstractProcessingHandler
             'channel' => $record['channel'],
             'level' => Logger::getLevelName($record['level']),
             'message' => $record['message'],
-            'context' => json_encode($record['context'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-            'extra' => json_encode($record['extra'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
+            'context' => $this->serialize($record['context']),
+            'extra' => $this->serialize($record['extra']),
         ));
     }
 
@@ -76,5 +77,17 @@ SQL
         );
 
         $this->initialized = true;
+    }
+
+    /**
+     * @param $data
+     *
+     * @return string
+     */
+    private function serialize($data)
+    {
+        $formatter = new NormalizerFormatter();
+
+        return json_encode($formatter->format($data), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 }
