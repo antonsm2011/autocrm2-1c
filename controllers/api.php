@@ -144,7 +144,14 @@ $api->before(function (Request $request) use ($app) {
     if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
         $data = json_decode($request->getContent(), true);
         if ($data === null) {
-            $app->abort(400, 'Данные форматированы некорректно');
+            $app['logger']->error('Данные запроса форматированы некорректно', [
+                'request' => [
+                    'headers' => $request->headers->all(),
+                    'body' => $request->getContent(),
+                ],
+            ]);
+
+            return new Response('Данные запроса форматированы некорректно', 400);
         }
         $request->request->set('data', $data);
     }
