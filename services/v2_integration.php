@@ -21,7 +21,7 @@ Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
  *   "ClientStatement": "то-60 000",
  *   "Recommendations": "ХОДОВАЯ ЧАСТЬ А\\/М - НАДРЫВЫ САЙЛЕНТБЛОКОВ ПЕРЕДНИХ НИЖНИХ РЫЧАГОВ-РЕКОМЕНДУЕТСЯ ЗАМЕНА+КОМПЛЕКТ РАЗВАЛЬНЫХ БОЛТОВ\r\n\r\nЛЮФТ ЗАДНЕГО ПРАВОГО ПОДШИПНИКА ПОЛУОСИ - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nЛЮФТ ЗАДНИХ ВТУЛОК СТАБИЛИЗАТОРА - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nЗАКЛИНИЛ ПРАВЫЙ ТРОС РУЧНИКА - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nТОРМОЗНАЯ СИСТЕМА - ИЗНОС ПТК - 20%, ЗТК - 40%\r\nТЕЧЕЙ ТЕХНИЧЕСКИХ ЖИДКОСТЕЙ НЕ ВЫЯВЛЕНО\r\nВЫХЛОПНАЯ СИСТЕМА - НОРМА\r\nДИАГНОСТИКА ЭСУД - НОРМА (коды неисправностей не выявлены)\r\n\r\nКОМПАНИЯ «АПМ» ПРИГЛАШАЕТ НА ПРОВЕДЕНИЕ ОЧЕРЕДНОГО ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ В НАШ ДИЛЕРСКИЙ АВТОЦЕНТР НА ПРОБЕГЕ 75 000 КМ, НО НЕ ПОЗДНЕЕ ЧЕМ ЧЕРЕЗ ОДИН ГОД\r\n\r\nСОБЛЮДЕНИЕ ИНТЕРВАЛОВ ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ – НЕОБХОДИМОЕ УСЛОВИЕ ГАРАНТИИ НА А\\/М, А ТАКЖЕ УСЛОВИЕ ПОДДЕРЖАНИЯ А\\/М В ТЕХНИЧЕСКИ ИСПРАВНОМ СОСТОЯНИИ!!!\r\n",
  *   "Salon": {
- *     "DataType": "Автосалоны",
+ *     "DataType": "Подразделения компании",
  *     "Id": "ЦБ000001",
  *     "Name": "Фантастик-Моторс"
  *   },
@@ -206,12 +206,13 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
     $vehicleData = array_merge($data->hash('Car'), [
-        "Client" => $data->hash('Client')
+        "Client" => array_merge($data->hash('Client'), ['Salon' => $data->hash('Salon')])
     ]);
 
     $success = true;
 
-    $success = null !== ($departmentId = $app['v2']['department']($data->hash('Department'), $forClient)) && $success;
+    $departmentData = array_merge($data->hash('Department'), ['Salon' => $data->hash('Salon')]);
+    $success = null !== ($departmentId = $app['v2']['department']($departmentData, $forClient)) && $success;
     $success = null !== ($repairTypeId = $app['v2']['service_repair_type']($data->hash('RepairType'), $forClient)) && $success;
     $success = null !== $app['v2']['client_vehicle']($vehicleData, $forClient) && $success;
 
@@ -367,7 +368,7 @@ $clientSaver = function (array $data, $forClient) use ($app) {
         }
     }
 
-    $clientData['autosalons'] = [$app['v2']['autosalon']([], $forClient)];
+    $clientData['autosalons'] = [$app['v2']['autosalon']($data->hash('Salon'), $forClient)];
 
     $v2Client = null;
     $id = $data->string('Id');
@@ -486,7 +487,7 @@ $departmentSaver = function (array $data, $forClient) use ($app) {
 
     $departmentData = [
         'name' => $data->string("Name"),
-        'primaryAutosalon' => $app['v2']['autosalon']([], $forClient),
+        'primaryAutosalon' => $app['v2']['autosalon']($data->hash('Salon'), $forClient),
     ];
     $queryParams = ['Infotech_Autocrm_Dealer_Models_Department[type]' => 'autoservice.mechanics'];
 
@@ -507,16 +508,12 @@ $vehicleModelGetter = function (array $data, $forClient) use ($app) {
     return $modelId;
 };
 
-$autosalonGetter = function (array $data, $forClient) use ($app) {
-    if (null === $autosalonId = $app['association_fetcher']($forClient, 'autosalons', 'default')) {
-        $result = $app['v2_send']($forClient, 'get', '/autosalons');
-        if ($result /* not null and not empty array */) {
-            $autosalonId = $result[0]['id'];
-            $app['association_saver']($forClient, 'autosalons', 'default', $autosalonId);
-        }
-    }
+$autosalonSaver = function (array $data, $forClient) use ($app) {
+    $data = DataArray::create($data);
 
-    return $autosalonId;
+    return $app['v2_save']($forClient, 'autosalons', $data->string("Id"), [
+        'name' => $data->string("Name"),
+    ]);
 };
 
 // ------------------------------------------------------------
@@ -531,7 +528,7 @@ $app['v2'] = [
     'service_repair_type' => $serviceRepairTypeSaver,
     'user' => $userSaver,
     'department' => $departmentSaver,
-    'autosalon' => $autosalonGetter,
+    'autosalon' => $autosalonSaver,
     'inventory_item' => $inventoryItemSaver,
     'inventory_unit' => $inventoryUnitSaver,
 ];
