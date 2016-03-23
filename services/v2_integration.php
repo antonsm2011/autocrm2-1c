@@ -366,8 +366,9 @@ $clientSaver = function (array $data, $forClient) use ($app) {
     $clientData['autosalons'] = [$app['v2']['autosalon']([], $forClient)];
 
     $v2Client = null;
+    $id = $data->string('Id');
 
-    if ($app['v2_save']($forClient, 'clients', $data->string('Id'), $clientData, ['type' => $type], 'id', $v2Client)) {
+    if ($app['v2_save']($forClient, 'clients', $id, $clientData, ['type' => $type], 'id', [], $v2Client)) {
         if ($type == 'individual') {
             $app['association_saver'](
                 $forClient,
@@ -440,15 +441,18 @@ $serviceRepairTypeSaver = function (array $data, $forClient) use ($app) {
 
 $userSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
+    $id = $data->string("Id");
 
-    return $app['v2_save']($forClient, 'users', $data->string("Id"), [
-        'username' => $data->string("Id"),
+    $userData = [
+        'username' => $id,
         'password' => uniqid(),
         'role' => 'admin',
         'fullname' => $data->string("Name"),
         'email' => $data->email("Email"),
         'departments' => [$app['association_fetcher']($forClient, 'departments', $data->string("Department"))]
-    ]);
+    ];
+
+    return $app['v2_save']($forClient, 'users', $id, $userData, [], 'id', ['username', 'password', 'role']);
 };
 
 $departmentSaver = function (array $data, $forClient) use ($app) {
@@ -621,11 +625,12 @@ $app['v2_save'] = $app->protect(
      * @param array  $data
      * @param array  $query
      * @param string $idField
+     * @param array  $updateExcept Список ключей из $data, которые не отправляются при обновлении
      * @param array|null $crmData
      *
      * @return null|integer
      */
-    function ($clientId, $type, $id, $data, $query = [], $idField = 'id', &$crmData = null) use ($app) {
+    function ($clientId, $type, $id, $data, $query = [], $idField = 'id', $updateExcept = [], &$crmData = null) use ($app) {
         /** @var \Monolog\Logger $logger */
         $logger = $app['logger']->withName('v2_saver');
 
@@ -642,6 +647,11 @@ $app['v2_save'] = $app->protect(
             $crmId = $app['association_fetcher']($clientId, $type, $id);
 
             $url = implode('/', ['', $type, ($crmId ? 'save/' . $crmId : 'create')]);
+
+            if ($crmId && $updateExcept) {
+                $data = array_diff_key($data, array_flip($updateExcept));
+            }
+
             $logger->debug('Отправка запроса "' . $url . '"', ['query' => $query, 'json' => $data]);
 
             $crmData = $app['v2_send']($clientId, 'post', $url, $data, $query);
