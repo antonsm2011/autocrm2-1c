@@ -82,9 +82,11 @@ $app->finish(function () use ($app) {
         if (null === $data) {
             $logger->error('Ошибка декодирования данных записи ' .  $row['id'], $row);
             $errorsCount++;
+            continue;
         } elseif (empty($data['DataType']) || $data['DataType'] !== 'Заказ-наряд') {
             $logger->error('Данные записи ' .  $row['id'] . ' не являются заказ-нарядом');
             $errorsCount++;
+            continue;
         }
 
         try {
