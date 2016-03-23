@@ -304,7 +304,7 @@ $clientSaver = function (array $data, $forClient) use ($app) {
 
     $clientData = [
         'email' => $data->email('Email'),
-        'phones' => $data->collection('Phones', 'phone'),
+        'phones' => unique_phones($data->collection('Phones', 'phone')),
         'tags' => [],
     ];
 
@@ -399,7 +399,7 @@ $personSaver = function (array $data, $forClient) use ($app) {
         'middleName' => array_pop($nameParts),
         'firstName' => array_pop($nameParts),
         'lastName' => implode(' ', $nameParts),
-        'phones' => $data->collection('Phones', 'phone'),
+        'phones' => unique_phones($data->collection('Phones', 'phone')),
     ];
 
     return $app['v2_save']($forClient, 'persons', $data->string("Id"), $personData);
@@ -856,4 +856,17 @@ class DataArray {
 
         return $arr;
     }
+}
+
+function unique_phones(array $phones)
+{
+    $uniquePhones = [];
+    foreach ($phones as $phone) {
+        $numberNormalized = preg_replace('/\D+/', '', $phone['number']);
+        if (!isset($uniquePhones[$numberNormalized])) {
+            $uniquePhones[$numberNormalized] = $phone;
+        }
+    }
+
+    return array_values($uniquePhones);
 }
