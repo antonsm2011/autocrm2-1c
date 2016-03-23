@@ -701,7 +701,7 @@ class DataArray {
         ];
 
         return isset($this->data[$field])
-            ? call_user_func($mods[$flags], (string)$this->data[$field])
+            ? trim(call_user_func($mods[$flags], (string)$this->data[$field]))
             : null;
     }
 
