@@ -16,55 +16,61 @@ Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
  * <code>
  * {
  *   "DataType": "Заказ-наряд",
- *   "Id": "А000000043",
- *   "Date": "18.01.2016",
- *   "ClientStatement": "ТО",
- *   "Recommendations": "",
+ *   "Id": "АП00029322",
+ *   "Date": "02.03.2016",
+ *   "ClientStatement": "то-60 000",
+ *   "Recommendations": "ХОДОВАЯ ЧАСТЬ А\\/М - НАДРЫВЫ САЙЛЕНТБЛОКОВ ПЕРЕДНИХ НИЖНИХ РЫЧАГОВ-РЕКОМЕНДУЕТСЯ ЗАМЕНА+КОМПЛЕКТ РАЗВАЛЬНЫХ БОЛТОВ\r\n\r\nЛЮФТ ЗАДНЕГО ПРАВОГО ПОДШИПНИКА ПОЛУОСИ - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nЛЮФТ ЗАДНИХ ВТУЛОК СТАБИЛИЗАТОРА - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nЗАКЛИНИЛ ПРАВЫЙ ТРОС РУЧНИКА - РЕКОМЕНДУЕТСЯ ЗАМЕНА\r\n\r\nТОРМОЗНАЯ СИСТЕМА - ИЗНОС ПТК - 20%, ЗТК - 40%\r\nТЕЧЕЙ ТЕХНИЧЕСКИХ ЖИДКОСТЕЙ НЕ ВЫЯВЛЕНО\r\nВЫХЛОПНАЯ СИСТЕМА - НОРМА\r\nДИАГНОСТИКА ЭСУД - НОРМА (коды неисправностей не выявлены)\r\n\r\nКОМПАНИЯ «АПМ» ПРИГЛАШАЕТ НА ПРОВЕДЕНИЕ ОЧЕРЕДНОГО ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ В НАШ ДИЛЕРСКИЙ АВТОЦЕНТР НА ПРОБЕГЕ 75 000 КМ, НО НЕ ПОЗДНЕЕ ЧЕМ ЧЕРЕЗ ОДИН ГОД\r\n\r\nСОБЛЮДЕНИЕ ИНТЕРВАЛОВ ТЕХНИЧЕСКОГО ОБСЛУЖИВАНИЯ – НЕОБХОДИМОЕ УСЛОВИЕ ГАРАНТИИ НА А\\/М, А ТАКЖЕ УСЛОВИЕ ПОДДЕРЖАНИЯ А\\/М В ТЕХНИЧЕСКИ ИСПРАВНОМ СОСТОЯНИИ!!!\r\n",
+ *   "Salon": {
+ *     "DataType": "Автосалоны",
+ *     "Id": "ЦБ000001",
+ *     "Name": "Фантастик-Моторс"
+ *   },
  *   "Department": {
  *     "DataType": "Цеха",
- *     "Id": "00000   ",
- *     "Name": "Основной цех"
+ *     "Id": "ЦБ000011",
+ *     "Name": "АПМ (С) слесарный цех"
  *   },
  *   "Employees": [
  *     {
  *       "DataType": "Сотрудники",
- *       "Id": "Администратор",
- *       "Name": "Беликова Мария Сергеевна",
+ *       "Id": "Куранина Н.А. (физлица)",
+ *       "Name": "Куранина Наталья Александровна",
  *       "Role": "Ответственный"
  *     },
  *     {
  *       "DataType": "Сотрудники",
- *       "Id": "0000000020",
- *       "Name": "Понтус Владимир",
+ *       "Id": "ЦБ00000252",
+ *       "Name": "Сергеев Сергей Александрович",
  *       "Role": "Мастер"
  *     },
  *     {
  *       "DataType": "Сотрудники",
- *       "Id": "0000000021",
- *       "Name": "Еремин Сергей",
+ *       "Id": "ЦБ00000257",
+ *       "Name": "Куранина Наталья Александровна",
  *       "Role": "Диспетчер"
  *     }
  *   ],
  *   "RepairType": {
  *     "DataType": "Виды ремонта",
- *     "Id": "ЦБ000002",
- *     "Name": "ТО"
+ *     "Id": "ЦБ000005",
+ *     "Name": "Техобслуживание"
  *   },
  *   "Client": {
  *     "DataType": "Контрагенты и контакты",
- *     "Id": "ЦБ000096",
- *     "LastName": "",
- *     "Name": "ООО Рога и копыта",
- *     "MiddleName": "",
- *     "Type": "Юридическое лицо",
- *     "Kpp": "682901001",
+ *     "Id": "ЦБ038056",
+ *     "LastName": "Пономарев",
+ *     "Name": "Виктор",
+ *     "MiddleName": "Михайлович",
+ *     "Gender": "",
+ *     "Type": "Частное лицо",
+ *     "Kpp": "",
  *     "Inn": "",
- *     "Ogrn": "1234567890",
+ *     "Ogrn": "",
  *     "Addresses": [
  *       {
- *         "Addr": "",
+ *         "Addr": "НОВОЧЕРЕМУШКИНСКАЯ 24 КВ 108",
  *         "DataType": "Адреса",
- *         "Type": "",
+ *         "Type": "Фактический адрес",
  *         "PostCode": "",
  *         "Region": "",
  *         "District": "",
@@ -75,38 +81,13 @@ Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
  *         "Apartment": ""
  *       }
  *     ],
- *     "Contacts": [
- *       {
- *         "DataType": "Контактные лица",
- *         "Id": "КТ000000102",
- *         "Name": "Михайлов Иван Петрович",
- *         "Phones": [
- *           {
- *             "DataType": "Телефоны",
- *             "Type": "Контактный телефон",
- *             "Number": "+7(905)1234561"
- *           }
- *         ]
- *       },
- *       {
- *         "DataType": "Контактные лица",
- *         "Id": "КТ000000130",
- *         "Name": "Михайлова Юлия Геннадиевна",
- *         "Phones": [
- *           {
- *             "DataType": "Телефоны",
- *             "Type": "Контактный телефон",
- *             "Number": "+7(980)6325354"
- *           }
- *         ]
- *       }
- *     ],
+ *     "Contacts": [],
  *     "Email": "",
  *     "Phones": [
  *       {
  *         "DataType": "Телефоны",
- *         "Type": "Контактный телефон",
- *         "Number": "+7(905)1234561"
+ *         "Type": "Мобильный телефон",
+ *         "Number": "+7 (915) 2272526"
  *       }
  *     ],
  *     "Documents": [
@@ -122,20 +103,20 @@ Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
  *   },
  *   "Car": {
  *     "DataType": "Автомобили",
- *     "Id": "ЦБ00000030",
- *     "VIN": "",
+ *     "Id": "ЦБ00041932",
+ *     "VIN": "Z8US0A16SA0000265",
  *     "Model": {
  *       "DataType": "Модели автомобилей",
- *       "Id": "ЦБ00000012",
- *       "Name": "C-Crosser"
+ *       "Id": "ЦБ00000368",
+ *       "Name": "SsangYong Kyron"
  *     },
- *     "RegNum": "",
- *     "Mileage": "",
- *     "ProductionYear": 2008,
+ *     "RegNum": "Р323РА32",
+ *     "Mileage": "20021",
+ *     "ProductionYear": 2010,
  *     "Engine": {
  *       "DataType": "Типы двигателей",
- *       "Id": "        ",
- *       "Name": ""
+ *       "Id": "ЦБ000017",
+ *       "Name": "бензиновый"
  *     },
  *     "Transmission": {
  *       "DataType": "Типы КПП",
@@ -154,49 +135,68 @@ Httpful::register(Mime::JSON, new JsonHandler(['decode_as_array' => true]));
  *       "Id": 1,
  *       "Type": {
  *         "DataType": "Автоработы",
- *         "Id": "ЦБ00000021",
- *         "Name": "ТО-1",
- *         "StandardTime": "",
- *         "Code": "1"
+ *         "Id": "ЦБ00001863",
+ *         "Name": "ТО-60000 АКПП БЕНЗИН",
+ *         "StandardTime": "5,30",
+ *         "Code": ""
  *       },
- *       "StandardTime": "1,00",
- *       "Price": "5 000,00",
+ *       "StandardTime": "5,30",
+ *       "Price": "1 500,00",
  *       "Quantity": "1,00",
- *       "DiscountPercent": "",
- *       "Sum": "5 000,00"
+ *       "DiscountPercent": "30,00",
+ *       "Sum": "5 565,00"
  *     },
  *     {
  *       "DataType": "Работы заказ-наряда",
  *       "Id": 2,
  *       "Type": {
  *         "DataType": "Автоработы",
- *         "Id": "ЦБ00000015",
- *         "Name": "ТО-2",
- *         "StandardTime": "",
- *         "Code": "12"
+ *         "Id": "ЦБ00001013",
+ *         "Name": "ЗАЩИТА ДВС С\\/У",
+ *         "StandardTime": "0,40",
+ *         "Code": ""
  *       },
- *       "StandardTime": "1,00",
- *       "Price": "7 000,00",
+ *       "StandardTime": "0,40",
+ *       "Price": "1 500,00",
  *       "Quantity": "1,00",
- *       "DiscountPercent": "",
- *       "Sum": "7 000,00"
+ *       "DiscountPercent": "30,00",
+ *       "Sum": "420,00"
  *     }
  *   ],
  *   "Materials": [
  *     {
- *       "DataType": "Номенклатура",
- *       "Id": "",
- *       "Type": "",
- *       "Price": "",
- *       "Quantity": "",
+ *       "DataType": "Материалы заказ-наряда",
+ *       "Id": 1,
+ *       "Type": {
+ *         "DataType": "Номенклатура",
+ *         "Id": "ЦБ001638",
+ *         "Name": "МАСЛО Ssang Yong 5W40 200Л.",
+ *         "Code": "LLK05W40200"
+ *       },
+ *       "Price": "400,00",
+ *       "Quantity": "8,20",
  *       "DiscountPercent": "",
- *       "Sum": ""
+ *       "Sum": "3 280,00"
+ *     },
+ *     {
+ *       "DataType": "Материалы заказ-наряда",
+ *       "Id": 2,
+ *       "Type": {
+ *         "DataType": "Номенклатура",
+ *         "Id": "ЦБ007626",
+ *         "Name": "ФИЛЬТР МАСЛ KYR\\/REX\\/ACT",
+ *         "Code": "1621803009."
+ *       },
+ *       "Price": "520,00",
+ *       "Quantity": "1,00",
+ *       "DiscountPercent": "",
+ *       "Sum": "520,00"
  *     }
  *   ],
  *   "Stage": {
  *     "DataType": "Состояния заказ-нарядов",
- *     "Id": "0000000001",
- *     "Name": "Заявка"
+ *     "Id": "0000000005",
+ *     "Name": "Закрыт"
  *   }
  * }
  * <code>
@@ -237,7 +237,10 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
     $materials = array_map(function ($srcData) use (&$success, $app, $forClient) {
         $srcData = DataArray::create($srcData);
 
+        $success = null !== ($itemId = $app['v2']['inventory_item']($srcData->hash('Type'), $forClient)) && $success;
+
         return [
+            "spareId" => $itemId,
             "price" => $srcData->number("Price"),
             "quantity" => $srcData->number("Quantity"),
             "totalPrice" => $srcData->number('Sum'),
@@ -279,6 +282,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
         'createdAt' => $data->string('Date'),
         'no' => $data->string('Id'),
         'works' => $works,
+        'spares' => $materials,
         'assignee' => $assigneeId,
         'department' => $departmentId,
         'clientStatement' => $data->string('ClientStatement'),
@@ -421,6 +425,28 @@ $clientVehicleSaver = function (array $data, $forClient) use ($app) {
     return $app['v2_save']($forClient, 'vehicles', $data->string("Id"), $vehicleData);
 };
 
+$inventoryItemSaver = function (array $data, $forClient) use ($app) {
+    $data = DataArray::create($data);
+
+    $unitId = $app['v2']['inventory_unit']($data->hash('Unit'), $forClient);
+
+    return $app['v2_save']($forClient, 'warehouse/items', $data->string('Id'), [
+        'sku' => $data->string('Code'),
+        'title' => $data->string('Name'),
+        "unit" => $unitId,
+    ]);
+};
+
+$inventoryUnitSaver = function (array $data, $forClient) use ($app) {
+    $data = DataArray::create($data);
+
+    return $app['v2_save']($forClient, 'warehouse/units', $data->string('Id'), [
+        'abbreviation' => $data->string('Name'),
+        'title' => $data->string('Name'),
+        'description' => $data->string('Description'),
+    ]);
+};
+
 $serviceWorkTypeSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
@@ -506,6 +532,8 @@ $app['v2'] = [
     'user' => $userSaver,
     'department' => $departmentSaver,
     'autosalon' => $autosalonGetter,
+    'inventory_item' => $inventoryItemSaver,
+    'inventory_unit' => $inventoryUnitSaver,
 ];
 
 // ============================================================
