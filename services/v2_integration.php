@@ -299,7 +299,7 @@ $clientSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
 
     $clientData = [
-        'email' => $data->string('Email'),
+        'email' => $data->email('Email'),
         'phones' => $data->collection('Phones', 'phone'),
         'tags' => [],
     ];
@@ -446,7 +446,7 @@ $userSaver = function (array $data, $forClient) use ($app) {
         'password' => uniqid(),
         'role' => 'admin',
         'fullname' => $data->string("Name"),
-        'email' => $data->string("Email"),
+        'email' => $data->email("Email"),
         'departments' => [$app['association_fetcher']($forClient, 'departments', $data->string("Department"))]
     ]);
 };
@@ -757,6 +757,17 @@ class DataArray {
     public function set($field, $value)
     {
         $this->data[$field] = $value;
+    }
+
+    public function email($string)
+    {
+        $string = trim($string);
+
+        $userNamePart = '[a-zA-Z0-9!#$%&\'*+\\/=?^_`{|}~-]+';
+        $domainNamePart = '[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?';
+        $emailRegexp = "/^{$userNamePart}(?:\\.{$userNamePart})*@(?:{$domainNamePart}\\.)+{$domainNamePart}\$/";
+
+        return preg_match($emailRegexp, $string) ? $string : '';
     }
 
     // -------- structures ---------
