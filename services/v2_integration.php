@@ -184,8 +184,9 @@ $clientSaver = function (array $data, $forClient) use ($app) {
 
     $v2Client = null;
     $id = $data->string('Id');
+    $query = ['type' => $type, 'scenario' => 'draft'];
 
-    if ($app['v2_save']($forClient, 'clients', $id, $clientData, ['type' => $type], 'id', [], $v2Client)) {
+    if ($app['v2_save']($forClient, 'clients', $id, $clientData, $query, 'id', [], $v2Client)) {
         if ($type == 'individual') {
             $app['association_saver'](
                 $forClient,
