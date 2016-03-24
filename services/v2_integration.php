@@ -45,7 +45,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
             "quantity" => $srcData->number("Quantity"),
             "totalPrice" => $srcData->number('Sum'),
         ];
-    }, $data->collection('Works'));
+    }, $data->collection('Works', 'filled', ['Id', 'Type', 'Quantity']));
 
     $materials = array_map(function ($srcData) use (&$success, $app, $forClient) {
         $srcData = DataArray::create($srcData);
@@ -58,7 +58,7 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
             "quantity" => $srcData->number("Quantity"),
             "totalPrice" => $srcData->number('Sum'),
         ];
-    }, $data->collection('Materials'));
+    }, $data->collection('Materials', 'filled', ['Id', 'Type', 'Quantity']));
 
     $assigneeId = null;
     foreach ($data->collection('Employees', 'filled', ['Id', 'Name', 'Role']) as $employeeData) {
