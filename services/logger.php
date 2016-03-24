@@ -47,7 +47,7 @@ class PDOHandler extends AbstractProcessingHandler
         }
 
         $this->statement->execute(array(
-            'time' => $record['datetime']->format('Y-m-d H:i:s'),
+            'time' => $record['datetime']->format('Y-m-d H:i:s.u'),
             'process_id' => $record['process_id'],
             'channel' => $record['channel'],
             'level' => Logger::getLevelName($record['level']),
@@ -61,7 +61,7 @@ class PDOHandler extends AbstractProcessingHandler
     {
         $this->pdo->exec(<<<'SQL'
             CREATE TABLE IF NOT EXISTS logs (
-                time DATETIME,
+                time DATETIME(6),
                 process_id CHAR(32),
                 channel VARCHAR(255),
                 level VARCHAR(15),
