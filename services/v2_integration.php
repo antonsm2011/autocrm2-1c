@@ -431,6 +431,21 @@ $app['v2_send'] = $app->protect(
                         ],
                     ]
                 );
+            } elseif (!isset($savedData['success']) || !isset($savedData['result'])) {
+                $result = null;
+                $logger->error(
+                    'Ошибка API запроса к v2. Получен ответ неожиданной структуры',
+                    [
+                        'request' => [
+                            'url' => $url,
+                            'data' => $data,
+                        ],
+                        'response' => [
+                            'status' => $response->code,
+                            'body' => $response->raw_body,
+                        ],
+                    ]
+                );
             } elseif (!$savedData['success']) {
                 $result = null;
                 $logger->error(
