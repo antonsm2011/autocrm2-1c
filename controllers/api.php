@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 const RETRY_SECONDS = 60;
+const NEW_PROCESS_SECONDS = 10;
 
 /** @var \Silex\ControllerCollection $api */
 $api = $app['controllers_factory'];
@@ -39,15 +40,35 @@ $api->post('/package/create', function (Request $request) use ($app) {
 
 $app->finish(function () use ($app) {
     $retryMargin = date_create()->modify('-' . RETRY_SECONDS . ' seconds');
+    $newProcessMargin = date_create()->modify('-' . NEW_PROCESS_SECONDS . ' seconds');
 
     /** @var \Monolog\Logger $logger */
     $logger = $app['logger']->withName('v2_interaction');
-    $logger->info('Начало обработки добавленных отложенных записей');
-
-    $processId = $app['process_id'];
 
     /** @var PDO $db */
     $db = $app['db'];
+
+    $inProgressStatement = $db->prepare(
+        'SELECT processed_by FROM packages WHERE status = "checked" and processed_at >= ? LIMIT 1'
+    );
+    if (!$inProgressStatement->execute([$newProcessMargin->format('Y-m-d H:i:s')])) {
+        $logger->error('Ошибка БД при проверке того, запущена ли обработка', [
+            'PDO error' => $inProgressStatement->errorInfo()
+        ]);
+
+        return;
+    }
+    $inProgress = $inProgressStatement->fetchColumn();
+
+    if ($inProgress) {
+        $logger->info('Обработку в этом процессе не начинаем, т.к. она уже идет в процессе "' . $inProgress . '".');
+
+        return; // не запускаем параллельные обработки
+    }
+
+    $logger->info('Начало обработки добавленных отложенных записей');
+
+    $processId = $app['process_id'];
 
     $checkStatement = $db->prepare(
         'UPDATE packages SET processed_by = ?, processed_at = now(), status = "checked" '
