@@ -19,13 +19,14 @@ $app['client_fetcher'] = $app->protect(function ($id) use ($app) {
     return $result;
 });
 
-$app['clients_keys'] = $app->share(function ($app) {
-    $map = [];
+$app['clients_keys'] = $app->protect(function ($key) use ($app) {
     foreach ($app['clients'] as $client) {
-        foreach ($client['keys'] as $key) {
-            $map[$key] = &$client;
+        foreach ($client['keys'] as $clientKey) {
+            if ($key == $clientKey)  {
+                return $client;
+            }
         }
     }
 
-    return $map;
+    return null;
 });

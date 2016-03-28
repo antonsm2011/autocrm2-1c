@@ -155,11 +155,9 @@ $api->before(function (Request $request) use ($app) {
         $app->abort(401, 'Не указан API ключ');
     }
 
-    if (!isset($app['clients_keys'][$key])) {
+    if (!$app['client'] = $app['clients_keys']($key)) {
         $app->abort(403, 'Указан недействительный API ключ');
     }
-
-    $app['client'] = $app['clients_keys'][$key];
 });
 
 $api->before(function (Request $request) use ($app) {
