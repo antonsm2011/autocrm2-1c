@@ -59,9 +59,19 @@ class PDOHandler extends AbstractProcessingHandler
 
     private function initialize()
     {
-        $this->pdo->exec(<<<'SQL'
+        $version = $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
+
+        $version = array_reduce(
+            array_reverse(explode('.', explode('-', $version, 2)[0])),
+            function ($acc, $seg) { static $order = 0.01; return $acc + $seg * ($order *= 100); },
+            0
+        );
+
+        $timeType = $version >= 56000 ? 'DATETIME(6)' : 'CHAR(26)';
+
+        $this->pdo->exec(<<<"SQL"
             CREATE TABLE IF NOT EXISTS logs (
-                time DATETIME(6),
+                time {$timeType},
                 process_id CHAR(32),
                 channel VARCHAR(255),
                 level VARCHAR(15),
