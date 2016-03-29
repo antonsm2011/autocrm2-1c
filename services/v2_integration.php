@@ -25,7 +25,11 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
 
     $departmentData = array_merge($data->hash('Department'), ['Salon' => $data->hash('Salon')]);
     $success = null !== ($departmentId = $app['v2']['department']($departmentData, $forClient)) && $success;
-    $success = null !== ($repairTypeId = $app['v2']['service_repair_type']($data->hash('RepairType'), $forClient)) && $success;
+
+    $repairTypeData = $data->hash('RepairType');
+    $repairTypeData['Department'] = $departmentData['Id'];
+    $success = null !== ($repairTypeId = $app['v2']['service_repair_type']($repairTypeData, $forClient)) && $success;
+
     $success = null !== $app['v2']['client_vehicle']($vehicleData, $forClient) && $success;
 
     $works = array_map(function ($srcData) use (&$success, $data, $app, $forClient) {
@@ -274,7 +278,10 @@ $serviceWorkTypeSaver = function (array $data, $forClient) use ($app) {
 
 $serviceRepairTypeSaver = function (array $data, $forClient) use ($app) {
     $data = DataArray::create($data);
-    $repairTypeData = ['name' => $data->string("Name")];
+    $repairTypeData = [
+        'name' => $data->string("Name"),
+        'departments' => [$app['association_fetcher']($forClient, 'departments', $data->string('Department'))],
+    ];
 
     return $app['v2_save']($forClient, 'serviceStation/repairType', $data->string("Id"), $repairTypeData);
 };
