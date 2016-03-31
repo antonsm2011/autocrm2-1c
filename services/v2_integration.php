@@ -85,10 +85,13 @@ $serviceCaseSaver = function (array $data, $forClient) use ($app) {
     }
 
     static $statusMap = [
-        "Заявка" => 'service.reminder',
-        "Начать работу" => 'service.reminder',
+        "Открыт" => 'service.reminder',
         "В работе" => 'service.reminder',
         "Выполнен" => 'completed',
+        "Отказ" => 'rejected',
+        // todo: удалить после наведения порядка на стороне 1С
+        "Заявка" => 'service.reminder',
+        "Начать работу" => 'service.reminder',
         "Закрыт" => 'completed',
     ];
 
