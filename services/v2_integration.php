@@ -237,7 +237,7 @@ $clientVehicleSaver = function (array $data, $forClient) use ($app) {
     $vehicleData = [
         'modelId' => $app['v2']['vehicle_model']($modelData, $forClient),
         'vin' => preg_match('/^[0-9A-Z]{17}$/', $data->string("VIN")) ? $data->string("VIN") : null,
-        'regNumber' => $data->string("RegNum"),
+        'regNumber' => $data->string("RegNum", DataArray::STR_TOUPPER),
         'mileage' => $data->number("Mileage"),
         'productionYear' => $data->number("ProductionYear"),
         'clientId' => $ownerId,
@@ -550,6 +550,7 @@ $app['v2_save'] = $app->protect(
 class DataArray {
 
     const STR_TOLOWER = 1;
+    const STR_TOUPPER = 2;
 
     const PHONE_TYPE_WORK = 'W';
     const PHONE_TYPE_HOME = 'H';
@@ -570,7 +571,8 @@ class DataArray {
     {
         $mods = [
             0 => 'strval',
-            self::STR_TOLOWER => 'mb_strtolower'
+            self::STR_TOLOWER => 'mb_strtolower',
+            self::STR_TOUPPER => 'mb_strtoupper',
         ];
 
         return isset($this->data[$field])
