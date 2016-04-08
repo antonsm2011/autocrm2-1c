@@ -392,9 +392,10 @@ $app['v2_send'] = $app->protect(
 
         if ($data === null) {
             $requestBody = null;
-        } elseif (!$requestBody = json_encode($data, JSON_UNESCAPED_UNICODE)) {
+        } elseif (!$requestBody = @json_encode($data, JSON_UNESCAPED_UNICODE)) {
             $logger->error('Ошибка сериализации данных для передачи в v2.', [
                 'data' => $data,
+                'json_error' => json_last_error_msg(),
             ]);
         }
 
